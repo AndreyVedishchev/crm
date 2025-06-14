@@ -1,0 +1,42 @@
+### все
+GET http://localhost:8080/employee/all
+
+### все с сортировкой по имени и роли
+GET http://localhost:8080/employee/allSorted
+
+### поиск по имени, фамилии, email, роли
+GET http://localhost:8080/employee/By4Fields?name=name1&surname=surname1&email=mail1@mail.mail&role=MANAGER
+
+### поиск по id
+GET http://localhost:8080/employee/21
+
+### пагинация
+GET http://localhost:8080/employee/getPage?page=1&size=3
+
+### добавление
+POST http://localhost:8080/employee/create
+Content-Type: application/json
+
+{
+  "name": "name123",
+  "surname": "surname123",
+  "email": "mail123@mail.mail",
+  "password": "password123",
+  "role": "MANAGER"
+}
+
+### обновление
+POST http://localhost:8080/employee/update
+Content-Type: application/json
+
+{
+  "id": 24,
+  "name": "name123",
+  "surname": "surname123",
+  "email": "mail123@mail.mail",
+  "password": "password123123",
+  "role": "MANAGER"
+}
+
+### удаление по id
+POST http://localhost:8080/employee/delete/23
