@@ -5,11 +5,10 @@ import ru.dev.crm.enums.Role;
 
 @Data
 public class EmployeeDto {
-//    private Integer id;
+    private Integer id;
     private String name;
     private String surname;
     private String email;
     private String password;
-    private String role;
-//    private Role role;
+    private Role role;
 }

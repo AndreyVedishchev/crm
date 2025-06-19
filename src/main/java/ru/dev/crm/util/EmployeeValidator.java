@@ -1,13 +1,14 @@
 package ru.dev.crm.util;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import ru.dev.crm.enums.Role;
 import ru.dev.crm.models.Employee;
 import ru.dev.crm.repository.EmployeeRepository;
+import ru.dev.crm.specification.EmployeeSpecification;
 
-import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class EmployeeValidator implements Validator {
@@ -27,22 +28,15 @@ public class EmployeeValidator implements Validator {
     public void validate(Object o, Errors errors) {
         Employee emplFromReq = (Employee) o;
 
-        Employee emplByEmail = employeeRepository.findByEmail(emplFromReq.getEmail());
+        Specification<Employee> spec = EmployeeSpecification.hasEmail(emplFromReq.getEmail());
+        Optional<Employee> optional = employeeRepository.findOne(spec);
+        Employee emplByEmail = optional.orElse(null);
+
         if (emplByEmail != null && !emplByEmail.getId().equals(emplFromReq.getId())) {
             errors.rejectValue("email", "", "Сотрудник с таким email уже существует.");
         }
-
-        String role = emplFromReq.getRole();
-        if (!(Objects.equals(role, "ADMINISTRATOR") || Objects.equals(role, "MANAGER"))) {
-            errors.rejectValue("role", "", "Роль должна иметь значение ADMINISTRATOR или MANAGER");
+        if (emplFromReq.getPassword().length() < 6) {
+            errors.rejectValue("password", "", "Минимальный размер пароля 6 символов.");
         }
-
-        /**
-         * если использовать enum, то до этой проверки не доходит, см. класс Employee
-         */
-//        Role role = emplFromReq.getRole();
-//        if (!(role == Role.ADMINISTRATOR || role == Role.MANAGER)) {
-//            errors.rejectValue("role", "", "Роль должна иметь значение ADMINISTRATOR или MANAGER");
-//        }
     }
 }

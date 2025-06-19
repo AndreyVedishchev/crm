@@ -1,95 +1,87 @@
 package ru.dev.crm.controllers;
 
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import ru.dev.crm.controllers.dto.ApiResponse;
 import ru.dev.crm.controllers.dto.EmployeeDto;
-import ru.dev.crm.mapper.EmployeeMapper;
-import ru.dev.crm.models.Employee;
+import ru.dev.crm.enums.Role;
+import ru.dev.crm.exceptions.EmployeeValidationException;
 import ru.dev.crm.service.EmployeeService;
-import ru.dev.crm.util.EmployeeValidator;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-    private final EmployeeValidator validator;
 
-    public EmployeeController(EmployeeService employeeService, EmployeeValidator validator) {
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
-        this.validator = validator;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody @Valid Employee employee, BindingResult bindingResult) {
-        validator.validate(employee, bindingResult);
-        if (bindingResult.hasErrors()) {
-            List<ObjectError> allErrors = bindingResult.getAllErrors();
-            List<String> messages = allErrors.stream().map(er -> er.getDefaultMessage()).toList();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages);
+    @PostMapping
+    public ResponseEntity<ApiResponse<EmployeeDto>> create(@RequestBody EmployeeDto inputDto) {
+        try {
+            EmployeeDto employeeDto = employeeService.create(inputDto);
+            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+        } catch (EmployeeValidationException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
         }
-        Employee empl = employeeService.create(employee);
-        EmployeeDto employeeDto = EmployeeMapper.INSTANCE.toEmployeeDto(empl);
-        return new ResponseEntity<>(employeeDto, HttpStatus.CREATED);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<?> update(@RequestBody @Valid Employee employee, BindingResult bindingResult) {
-        validator.validate(employee, bindingResult);
-        if (bindingResult.hasErrors()) {
-            List<ObjectError> allErrors = bindingResult.getAllErrors();
-            List<String> messages = allErrors.stream().map(er -> er.getDefaultMessage()).toList();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(messages);
+    @PutMapping
+    public ResponseEntity<ApiResponse<EmployeeDto>> update(@RequestBody EmployeeDto inputDto) {
+        try {
+            EmployeeDto employeeDto = employeeService.update(inputDto);
+            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+        } catch (EmployeeValidationException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
         }
-        Employee empl = employeeService.update(employee);
-        EmployeeDto employeeDto = EmployeeMapper.INSTANCE.toEmployeeDto(empl);
-        return new ResponseEntity<>(employeeDto, HttpStatus.OK);
     }
 
-    @PostMapping("/delete/{id}")
-    public void delete(@PathVariable Integer id) {
-        employeeService.delete(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<EmployeeDto>> delete(@PathVariable Integer id) {
+        try {
+            employeeService.delete(id);
+            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(null);
+            apiResponse.setAction("Сотрудник с id " + id + " удален.");
+            apiResponse.setSuccess(true);
+            return ResponseEntity.ok(apiResponse);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> getEmployee(@PathVariable Integer id) {
-        Optional<Employee> empl = employeeService.get(id);
-        EmployeeDto employeeDto = EmployeeMapper.INSTANCE.toEmployeeDto(empl.get());
-        return new ResponseEntity<>(employeeDto, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<EmployeeDto>> getEmployee(@PathVariable Integer id) {
+        try {
+            EmployeeDto employeeDto = employeeService.get(id);
+            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
+        }
     }
 
-    @GetMapping("/all")
-    public List<EmployeeDto> getAll() {
-        List<Employee> allEmpl = employeeService.getAll();
-        return EmployeeMapper.INSTANCE.toEmployeeDtoList(allEmpl);
-    }
-
-    @GetMapping("/By4Fields")
-    public ResponseEntity<EmployeeDto> getBy4Fields(@RequestParam String name, @RequestParam String surname
-                                                    , @RequestParam String email, @RequestParam String role) {
-        Optional<Employee> empl = employeeService.getBy4Fields(name, surname, email, role);
-        EmployeeDto employeeDto = EmployeeMapper.INSTANCE.toEmployeeDto(empl.get());
-        return new ResponseEntity<>(employeeDto, HttpStatus.OK);
-    }
-
-    @GetMapping("/allSorted")
-    public List<EmployeeDto> getAllSorted() {
-        List<Employee> sortedEmpl = employeeService.getSorted();
-        return EmployeeMapper.INSTANCE.toEmployeeDtoList(sortedEmpl);
-    }
-
-    @GetMapping("/getPage")
-    public List<EmployeeDto> getPage(@RequestParam(defaultValue = "0") int page
-                                    , @RequestParam(defaultValue = "10") int size) {
-        Page<Employee> employeePage = employeeService.getEmployeePage(page, size);
-        return EmployeeMapper.INSTANCE.toEmployeeDtoList(employeePage.getContent());
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<EmployeeDto>>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean asc
+    ) {
+        try {
+            Page<EmployeeDto> result = employeeService.search(name, surname, email, password, role, page, size, asc);
+            return ResponseEntity.ok(new ApiResponse<>(result));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
+        }
     }
 }

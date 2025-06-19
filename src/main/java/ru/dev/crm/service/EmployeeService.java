@@ -1,18 +1,13 @@
 package ru.dev.crm.service;
 
 import org.springframework.data.domain.Page;
-import ru.dev.crm.models.Employee;
-
-import java.util.List;
-import java.util.Optional;
+import ru.dev.crm.controllers.dto.EmployeeDto;
+import ru.dev.crm.enums.Role;
 
 public interface EmployeeService {
-    Employee create(Employee employee);
-    Employee update(Employee employee);
+    EmployeeDto create(EmployeeDto employeeDto);
+    EmployeeDto update(EmployeeDto employeeDto);
     void delete(Integer id);
-    Optional<Employee> get(Integer id);
-    List<Employee> getAll();
-    Optional<Employee> getBy4Fields(String name, String surname ,String email, String role);
-    List<Employee> getSorted();
-    Page<Employee> getEmployeePage(int page, int size);
+    EmployeeDto get(Integer id);
+    Page<EmployeeDto> search(String name, String surname, String email, String password, Role role, int page, int size, boolean asc);
 }
