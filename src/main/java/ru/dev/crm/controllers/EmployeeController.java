@@ -25,7 +25,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> create(@RequestBody EmployeeDto inputDto) {
         try {
             EmployeeDto employeeDto = employeeService.create(inputDto);
-            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " добавлен.");
+            apiResponse.setSuccess(true);
+            return ResponseEntity.ok(apiResponse);
         } catch (EmployeeValidationException e) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
         }
@@ -35,7 +38,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> update(@RequestBody EmployeeDto inputDto) {
         try {
             EmployeeDto employeeDto = employeeService.update(inputDto);
-            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " обновлен.");
+            apiResponse.setSuccess(true);
+            return ResponseEntity.ok(apiResponse);
         } catch (EmployeeValidationException e) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
         } catch (Exception e) {
@@ -60,13 +66,16 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> getEmployee(@PathVariable Integer id) {
         try {
             EmployeeDto employeeDto = employeeService.get(id);
-            return ResponseEntity.ok(new ApiResponse<>(employeeDto));
+            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " найден.");
+            apiResponse.setSuccess(true);
+            return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<ApiResponse<Page<EmployeeDto>>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String surname,
@@ -79,7 +88,10 @@ public class EmployeeController {
     ) {
         try {
             Page<EmployeeDto> result = employeeService.search(name, surname, email, password, role, page, size, asc);
-            return ResponseEntity.ok(new ApiResponse<>(result));
+            ApiResponse<Page<EmployeeDto>> apiResponse = new ApiResponse<>(result);
+            apiResponse.setAction("Результат поиска по нескольким параметрам.");
+            apiResponse.setSuccess(true);
+            return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
         }

@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
     public ResponseEntity<ApiResponse<EmployeeDto>> handleHttpNotReadable(Exception ex) {
         if (ex.getCause() != null && ex.getCause().getMessage().contains("ru.dev.crm.enums.Role")) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Допустимые значения: ADMINISTRATOR, MANAGER")));
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Допустимые значения: администратор, менеджер")));
         }
         return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Ошибка в формате запроса: " + ex.getMessage())));
     }
