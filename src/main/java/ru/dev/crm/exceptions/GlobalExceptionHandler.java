@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.dev.crm.controllers.dto.ApiResponse;
-import ru.dev.crm.controllers.dto.EmployeeDto;
 
 import java.util.List;
 
@@ -14,9 +13,12 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
-    public ResponseEntity<ApiResponse<EmployeeDto>> handleHttpNotReadable(Exception ex) {
+    public ResponseEntity<ApiResponse<?>> handleHttpNotReadable(Exception ex) {
         if (ex.getCause() != null && ex.getCause().getMessage().contains("ru.dev.crm.enums.Role")) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Допустимые значения: администратор, менеджер")));
+        }
+        if (ex.getCause() != null && ex.getCause().getMessage().contains("ru.dev.crm.enums.Status")) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Допустимые значения: новый, в работе, выполнен, отменен")));
         }
         return ResponseEntity.badRequest().body(new ApiResponse<>(List.of("Ошибка в формате запроса: " + ex.getMessage())));
     }

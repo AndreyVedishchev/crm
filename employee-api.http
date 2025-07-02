@@ -2,7 +2,10 @@
 GET http://localhost:8080/employees?name=name123&surname=surname123&email=mail123@mail.mail111&role=ADMINISTRATOR
 
 ### поиск по id
-GET http://localhost:8080/employees/40
+GET http://localhost:8080/employees/33
+
+###
+GET http://localhost:8080/employees
 
 ### добавление
 POST http://localhost:8080/employees
@@ -21,12 +24,12 @@ PUT http://localhost:8080/employees
 Content-Type: application/json
 
 {
-  "id": 58,
-  "name": "name123123",
-  "surname": "surname123",
-  "email": "mail123@mail.mailhjhр",
-  "password": "password123123",
-  "role": "администратор"
+  "id": 33,
+  "name": "name123",
+  "surname": "surname1233",
+  "email": "mail123@mail.mail848440",
+  "password": "password123",
+  "role": "менеджер"
 }
 
 ### удаление по id

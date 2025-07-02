@@ -1,0 +1,30 @@
+###
+GET http://localhost:8080/orders?status=NEW&date=2025-07-02
+
+###
+GET http://localhost:8080/orders
+
+###
+GET http://localhost:8080/orders/39
+
+###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "status": "отменен",
+  "clientId": null
+}
+
+###
+PUT http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "id": 42,
+  "status": "новый",
+  "clientId": 2
+}
+
+###
+DELETE http://localhost:8080/orders/25
