@@ -12,4 +12,7 @@ public interface OrderService {
     void delete(Integer id);
     OrderDto get(Integer id);
     Page<OrderDto> search(Status status, LocalDate date, int page, int size, boolean asc);
+    OrderDto addProduct(Integer orderId, Integer productId, int quantity);
+    OrderDto updateProduct(Integer orderId, Integer productId, int quantity);
+    void deleteProduct(Integer orderId, Integer productId);
 }

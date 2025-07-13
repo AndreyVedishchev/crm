@@ -9,7 +9,11 @@ import ru.dev.crm.controllers.dto.OrderDto;
 import ru.dev.crm.enums.Status;
 import ru.dev.crm.mapper.OrderMapper;
 import ru.dev.crm.models.Order;
+import ru.dev.crm.models.OrderProduct;
+import ru.dev.crm.models.Product;
+import ru.dev.crm.repository.OrderProductRepository;
 import ru.dev.crm.repository.OrderRepository;
+import ru.dev.crm.repository.ProductRepository;
 import ru.dev.crm.service.OrderService;
 import ru.dev.crm.specification.OrderSpecification;
 
@@ -19,10 +23,14 @@ import java.util.Optional;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private final OrderProductRepository orderProductRepository;
+    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper) {
+    public OrderServiceImpl(OrderProductRepository orderProductRepository, ProductRepository productRepository, OrderRepository orderRepository, OrderMapper orderMapper) {
+        this.orderProductRepository = orderProductRepository;
+        this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
     }
@@ -81,5 +89,34 @@ public class OrderServiceImpl implements OrderService {
         }
         Page<Order> allOrders = orderRepository.findAll(spec, req);
         return allOrders.map(orderMapper::toOrderDto);
+    }
+
+    @Override
+    public OrderDto addProduct(Integer orderId, Integer productId, int quantity) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        Product product = productRepository.findById(productId).orElseThrow();
+
+        OrderProduct orderProduct = new OrderProduct();
+        orderProduct.setOrder(order);
+        orderProduct.setProduct(product);
+        orderProduct.setQuantity(quantity);
+        order.getOrderProducts().add(orderProduct);
+        Order save = orderRepository.save(order);
+        return orderMapper.toOrderDto(save);
+    }
+
+    @Override
+    public OrderDto updateProduct(Integer orderId, Integer productId, int quantity) {
+        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId).orElseThrow();
+        orderProduct.setQuantity(quantity);
+        orderProductRepository.save(orderProduct);
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        return orderMapper.toOrderDto(order);
+    }
+
+    @Override
+    public void deleteProduct(Integer orderId, Integer productId) {
+        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId).orElseThrow();
+        orderProductRepository.delete(orderProduct);
     }
 }

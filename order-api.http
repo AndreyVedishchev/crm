@@ -5,7 +5,7 @@ GET http://localhost:8080/orders?status=NEW&date=2025-07-02
 GET http://localhost:8080/orders
 
 ###
-GET http://localhost:8080/orders/39
+GET http://localhost:8080/orders/29
 
 ###
 POST http://localhost:8080/orders
@@ -27,4 +27,15 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:8080/orders/25
+DELETE http://localhost:8080/orders/41
+
+###
+POST http://localhost:8080/orders/addProduct?orderId=29&productId=6&quantity=1
+Content-Type: application/json
+
+###
+PUT http://localhost:8080/orders/updateProduct?orderId=29&productId=6&quantity=2
+Content-Type: application/json
+
+###
+DELETE http://localhost:8080/orders/deleteProduct?orderId=29&productId=6

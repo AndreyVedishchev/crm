@@ -94,4 +94,35 @@ public class OrderController {
             return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
         }
     }
+
+    @PostMapping("/addProduct")
+    public ResponseEntity<ApiResponse<OrderDto>> addProduct(
+            @RequestParam Integer orderId, @RequestParam Integer productId, @RequestParam int quantity
+    ) {
+        OrderDto orderDto = orderService.addProduct(orderId, productId, quantity);
+        ApiResponse<OrderDto> apiResponse = new ApiResponse<>(orderDto);
+        apiResponse.setAction("В заказ " + orderId + " добавлен продукт " + productId + " в кол-ве " + quantity + " шт.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PutMapping("/updateProduct")
+    public ResponseEntity<ApiResponse<OrderDto>> updateProduct(
+            @RequestParam Integer orderId, @RequestParam Integer productId, @RequestParam int quantity
+    ) {
+        OrderDto orderDto = orderService.updateProduct(orderId, productId, quantity);
+        ApiResponse<OrderDto> apiResponse = new ApiResponse<>(orderDto);
+        apiResponse.setAction("В заказe " + orderId + " обновлено кол-во продукта " + productId + ", новое значение " + quantity + " шт.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping("/deleteProduct")
+    public ResponseEntity<ApiResponse<OrderDto>> updateProduct(@RequestParam Integer orderId, @RequestParam Integer productId) {
+        orderService.deleteProduct(orderId, productId);
+        ApiResponse<OrderDto> apiResponse = new ApiResponse<>(null);
+        apiResponse.setAction("Из заказа " + orderId + " удален продукт " + productId);
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
