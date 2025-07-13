@@ -1,5 +1,6 @@
 package ru.dev.crm.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +19,6 @@ import ru.dev.crm.specification.EmployeeSpecification;
 import ru.dev.crm.util.EmployeeValidator;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -65,39 +65,27 @@ public class EmployeeServiceImpl implements EmployeeService {
                     .toList();
             throw new EmployeeValidationException(messages);
         }
-        Optional<Employee> emplById = employeeRepository.findById(employee.getId());
-        if (emplById.isPresent()) {
-            Employee empl = emplById.get();
-            empl.setName(employee.getName());
-            empl.setSurname(employee.getSurname());
-            empl.setEmail(employee.getEmail());
-            empl.setPassword(employee.getPassword());
-            empl.setRole(employee.getRole());
-            Employee update = employeeRepository.save(empl);
-            return employeeMapper.toEmployeeDto(update);
-        }
-        return null;
+        Employee emplById = employeeRepository.findById(employee.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Не найден сотрудник с id " + employee.getId()));
+        emplById.setName(employee.getName());
+        emplById.setSurname(employee.getSurname());
+        emplById.setEmail(employee.getEmail());
+        emplById.setPassword(employee.getPassword());
+        emplById.setRole(employee.getRole());
+        Employee update = employeeRepository.save(emplById);
+        return employeeMapper.toEmployeeDto(update);
     }
 
     @Override
     public void delete(Integer id) {
-        Optional<Employee> byId = employeeRepository.findById(id);
-        if (byId.isPresent()) {
-            employeeRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Не найден сотрудник с id " + id);
-        }
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден сотрудник с id " + id));
+        employeeRepository.delete(employee);
     }
 
     @Override
     public EmployeeDto get(Integer id) {
-        Optional<Employee> byId = employeeRepository.findById(id);
-        if (byId.isPresent()) {
-            Employee employee = byId.get();
-            return employeeMapper.toEmployeeDto(employee);
-        } else {
-            throw new RuntimeException("Не найден сотрудник с id " + id);
-        }
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден сотрудник с id " + id));
+        return employeeMapper.toEmployeeDto(employee);
     }
 
     @Override

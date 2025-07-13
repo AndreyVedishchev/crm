@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.dev.crm.controllers.dto.ApiResponse;
+import ru.dev.crm.models.Client;
+import ru.dev.crm.models.Employee;
+import ru.dev.crm.models.Order;
 import ru.dev.crm.models.Product;
 
 import java.util.List;
@@ -30,20 +33,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(ex.getMessage())));
     }
 
-//    @ExceptionHandler(ClientValidationException.class)
-//    public ResponseEntity<ApiResponse<Client>> handleClientValidationException(Exception ex) {
-//        return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(ex.getMessage())));
-//    }
-//
-//    @ExceptionHandler(EmployeeValidationException.class)
-//    public ResponseEntity<ApiResponse<Employee>> handleEmployeeValidationException(Exception ex) {
-//        return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(ex.getMessage())));
-//    }
-//
-//    @ExceptionHandler(OrderValidationException.class)
-//    public ResponseEntity<ApiResponse<Order>> handleOrderValidationException(Exception ex) {
-//        return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(ex.getMessage())));
-//    }
+    @ExceptionHandler(ClientValidationException.class)
+    public ResponseEntity<ApiResponse<Client>> handleClientValidationException(ClientValidationException ex) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>(ex.getMessages()));
+    }
+
+    @ExceptionHandler(EmployeeValidationException.class)
+    public ResponseEntity<ApiResponse<Employee>> handleEmployeeValidationException(EmployeeValidationException ex) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>(ex.getMessages()));
+    }
+
+    @ExceptionHandler(OrderValidationException.class)
+    public ResponseEntity<ApiResponse<Order>> handleOrderValidationException(OrderValidationException ex) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>(ex.getMessages()));
+    }
 
     @ExceptionHandler(ProductValidationException.class)
     public ResponseEntity<ApiResponse<Product>> handleProductValidationException(ProductValidationException ex) {

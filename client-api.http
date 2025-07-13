@@ -2,7 +2,7 @@
 GET http://localhost:8080/clients?name=name12345&surname=sur123qwe&email=mail123@mail.mail848441&phone=66666
 
 ###
-GET http://localhost:8080/clients/2
+GET http://localhost:8080/clients/3
 
 ###
 POST http://localhost:8080/clients

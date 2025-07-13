@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.dev.crm.controllers.dto.ApiResponse;
 import ru.dev.crm.controllers.dto.EmployeeDto;
 import ru.dev.crm.enums.Role;
-import ru.dev.crm.exceptions.EmployeeValidationException;
 import ru.dev.crm.service.EmployeeService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
@@ -23,56 +20,38 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<EmployeeDto>> create(@RequestBody EmployeeDto inputDto) {
-        try {
-            EmployeeDto employeeDto = employeeService.create(inputDto);
-            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
-            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " добавлен.");
-            apiResponse.setSuccess(true);
-            return ResponseEntity.ok(apiResponse);
-        } catch (EmployeeValidationException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
-        }
+        EmployeeDto employeeDto = employeeService.create(inputDto);
+        ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+        apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " добавлен.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @PutMapping
     public ResponseEntity<ApiResponse<EmployeeDto>> update(@RequestBody EmployeeDto inputDto) {
-        try {
-            EmployeeDto employeeDto = employeeService.update(inputDto);
-            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
-            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " обновлен.");
-            apiResponse.setSuccess(true);
-            return ResponseEntity.ok(apiResponse);
-        } catch (EmployeeValidationException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessages()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
-        }
+        EmployeeDto employeeDto = employeeService.update(inputDto);
+        ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+        apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " обновлен.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<EmployeeDto>> delete(@PathVariable Integer id) {
-        try {
-            employeeService.delete(id);
-            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(null);
-            apiResponse.setAction("Сотрудник с id " + id + " удален.");
-            apiResponse.setSuccess(true);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
-        }
+        employeeService.delete(id);
+        ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(null);
+        apiResponse.setAction("Сотрудник с id " + id + " удален.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EmployeeDto>> getEmployee(@PathVariable Integer id) {
-        try {
-            EmployeeDto employeeDto = employeeService.get(id);
-            ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
-            apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " найден.");
-            apiResponse.setSuccess(true);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
-        }
+        EmployeeDto employeeDto = employeeService.get(id);
+        ApiResponse<EmployeeDto> apiResponse = new ApiResponse<>(employeeDto);
+        apiResponse.setAction("Сотрудник с id " + employeeDto.getId() + " найден.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping
@@ -86,14 +65,10 @@ public class EmployeeController {
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "true") boolean asc
     ) {
-        try {
-            Page<EmployeeDto> result = employeeService.search(name, surname, email, password, role, page, size, asc);
-            ApiResponse<Page<EmployeeDto>> apiResponse = new ApiResponse<>(result);
-            apiResponse.setAction("Результат поиска по нескольким параметрам.");
-            apiResponse.setSuccess(true);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(List.of(e.getMessage())));
-        }
+        Page<EmployeeDto> result = employeeService.search(name, surname, email, password, role, page, size, asc);
+        ApiResponse<Page<EmployeeDto>> apiResponse = new ApiResponse<>(result);
+        apiResponse.setAction("Результат поиска по нескольким параметрам.");
+        apiResponse.setSuccess(true);
+        return ResponseEntity.ok(apiResponse);
     }
 }

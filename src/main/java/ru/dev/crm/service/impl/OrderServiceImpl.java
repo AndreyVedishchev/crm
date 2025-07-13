@@ -1,5 +1,6 @@
 package ru.dev.crm.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -18,7 +19,6 @@ import ru.dev.crm.service.OrderService;
 import ru.dev.crm.specification.OrderSpecification;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -46,35 +46,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto update(OrderDto orderDto) {
         Order order = orderMapper.toOrder(orderDto);
-        Optional<Order> byId = orderRepository.findById(order.getId());
-        if (byId.isPresent()) {
-            Order ord = byId.get();
-            ord.setStatus(order.getStatus());
-            ord.setClient(order.getClient());
-            Order save = orderRepository.save(ord);
-            return orderMapper.toOrderDto(save);
-        }
-        return null;
+        Order orderById = orderRepository.findById(order.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Не найден заказ с id " + orderDto.getId()));
+        orderById.setStatus(order.getStatus());
+        orderById.setClient(order.getClient());
+        Order save = orderRepository.save(orderById);
+        return orderMapper.toOrderDto(save);
     }
 
     @Override
     public void delete(Integer id) {
-        Optional<Order> byId = orderRepository.findById(id);
-        if (byId.isPresent()) {
-            orderRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Не найден заказ с id " + id);
-        }
+        Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден заказ с id " + id));
+        orderRepository.delete(order);
     }
 
     @Override
     public OrderDto get(Integer id) {
-        Optional<Order> byId = orderRepository.findById(id);
-        if (byId.isPresent()) {
-            return orderMapper.toOrderDto(byId.get());
-        } else {
-            throw new RuntimeException("Не найден заказ с id " + id);
-        }
+        Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден заказ с id " + id));
+        return orderMapper.toOrderDto(order);
     }
 
     @Override
@@ -93,9 +82,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto addProduct(Integer orderId, Integer productId, int quantity) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        Product product = productRepository.findById(productId).orElseThrow();
-
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден заказ с id " + orderId));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("При добавлении в заказ не найден продукт с id " + orderId));
         OrderProduct orderProduct = new OrderProduct();
         orderProduct.setOrder(order);
         orderProduct.setProduct(product);
@@ -107,16 +97,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto updateProduct(Integer orderId, Integer productId, int quantity) {
-        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId).orElseThrow();
+        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId)
+                .orElseThrow(() -> new EntityNotFoundException("В заказе " + orderId + " нет продукта " + productId));
         orderProduct.setQuantity(quantity);
         orderProductRepository.save(orderProduct);
-        Order order = orderRepository.findById(orderId).orElseThrow();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("В заказ " + orderId + " не добавлен продукт " + productId));
         return orderMapper.toOrderDto(order);
     }
 
     @Override
     public void deleteProduct(Integer orderId, Integer productId) {
-        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId).orElseThrow();
+        OrderProduct orderProduct = orderProductRepository.findByOrder_IdAndProduct_Id(orderId, productId)
+                .orElseThrow(() -> new EntityNotFoundException("В заказе " + orderId + " нет для удаления продукта " + productId));
         orderProductRepository.delete(orderProduct);
     }
 }

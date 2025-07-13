@@ -1,5 +1,6 @@
 package ru.dev.crm.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,6 @@ import ru.dev.crm.specification.ClientSpecification;
 import ru.dev.crm.util.ClientValidator;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -68,40 +68,29 @@ public class ClientServiceImpl implements ClientService {
                     .toList();
             throw new ClientValidationException(messages);
         }
-        Optional<Client> clientById = clientRepository.findById(client.getId());
-        if (clientById.isPresent()) {
-            Client cl = clientById.get();
-            cl.setName(client.getName());
-            cl.setSurname(client.getSurname());
-            cl.setEmail(client.getEmail());
-            cl.setPhone(client.getPhone());
-            cl.setOrders(client.getOrders());
-            Client save = clientRepository.save(cl);
-            return clientMapper.toClientDto(save);
-        }
-        return null;
+        Client clientById = clientRepository.findById(client.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Не найден клиент с id " + client.getId()));
+        clientById.setName(client.getName());
+        clientById.setSurname(client.getSurname());
+        clientById.setEmail(client.getEmail());
+        clientById.setPhone(client.getPhone());
+        clientById.setOrders(client.getOrders());
+        Client save = clientRepository.save(clientById);
+        return clientMapper.toClientDto(save);
     }
 
     @Override
     @Transactional
     public void delete(Integer id) {
-        Optional<Client> byId = clientRepository.findById(id);
-        if (byId.isPresent()) {
-            orderRepository.clearClientRef(id);
-            clientRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Не найден клиент с id " + id);
-        }
+        Client client = clientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден клиент с id " + id));
+        orderRepository.clearClientRef(id);
+        clientRepository.delete(client);
     }
 
     @Override
     public ClientDto get(Integer id) {
-        Optional<Client> byId = clientRepository.findById(id);
-        if (byId.isPresent()) {
-            return clientMapper.toClientDto(byId.get());
-        } else {
-            throw new RuntimeException("Не найден клиент с id " + id);
-        }
+        Client client = clientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не найден клиент с id " + id));
+        return clientMapper.toClientDto(client);
     }
 
     @Override
